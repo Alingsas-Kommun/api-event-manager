@@ -1,0 +1,28 @@
+{
+    "name": "helsingborg-stad/api-event-manager",
+    "description": "Manage events",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kristoffer Svanmark",
+            "email": "kristoffer.svanmark@lexiconitkonsult.se"
+        },
+        {
+            "name": "Sebastian Thulin",
+            "email": "sebastian.thulin@helsingborg.se"
+        },
+        {
+            "name": "Jonatan Hanson",
+            "email": "jonatan.hanson@hiq.se"
+        },
+        {
+            "name": "Tommy Moberg",
+            "email": "tommy.moberg@hiq.se"
+        }
+    ],
+    "require": {
+        "composer/installers": "~1.0",
+        "giggsey/libphonenumber-for-php": "^7.4"
+    }
+}
