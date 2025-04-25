@@ -1,0 +1,139 @@
+[{
+    "key": "group_680b8424acb32",
+    "title": "V\u00e4stsverige",
+    "fields": [
+        {
+            "key": "field_680b8424b1c92",
+            "label": "Daglig import",
+            "name": "vastsverige_daily_cron",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "ui_on_text": "",
+            "ui_off_text": "",
+            "ui": 1
+        },
+        {
+            "key": "field_680b8424b1c99",
+            "label": "Poststatus",
+            "name": "vastsverige_post_status",
+            "aria-label": "",
+            "type": "radio",
+            "instructions": "V\u00e4lj status f\u00f6r importerade evenemang.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "draft": "Utkast",
+                "publish": "Publicerad"
+            },
+            "default_value": "draft",
+            "return_format": "value",
+            "allow_null": 0,
+            "other_choice": 0,
+            "layout": "vertical",
+            "save_other_choice": 0
+        },
+        {
+            "key": "field_680b8424b1ca0",
+            "label": "API-l\u00e4nkar",
+            "name": "vastsverige_api_urls",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "L\u00e4gg till API l\u00e4nkar f\u00f6r import fr\u00e5n Open Library Solutions.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "acfe_repeater_stylised_button": 0,
+            "layout": "block",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "L\u00e4gg till rad",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_680b8424b4e22",
+                    "label": "API-l\u00e4nk",
+                    "name": "vastsverige_api_url",
+                    "aria-label": "",
+                    "type": "url",
+                    "instructions": "API-URL inklusive evenemangs-endpoint, utan fr\u00e5gestr\u00e4ng. T.ex. \u201chttps:\/\/example.com\/api\/events\u201d.",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "parent_repeater": "field_680b8424b1ca0"
+                },
+                {
+                    "key": "field_680b8424b4e29",
+                    "label": "Konfiguration",
+                    "name": "vastsverige_api_config",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "V\u00e4lj vilken konfiguration du vill h\u00e4mta data ifr\u00e5n. Varje kommun har en egen konfiguration. T ex Alings\u00e5s Kommun har 2671",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_680b8424b1ca0"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "acf-options-options"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "acfe_display_title": "",
+    "acfe_autosync": "",
+    "acfe_form": 0,
+    "acfe_meta": "",
+    "acfe_note": ""
+}]
+

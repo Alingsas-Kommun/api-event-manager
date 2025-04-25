@@ -73,6 +73,7 @@ $acfExportManager->autoExport(array(
     'internal_event' => 'group_5afecb1bf1b8d',
     'under-processing' => 'group_5b2b60ac1bb08',
     'open-library-solutions' => 'group_5ce25720a2508',
+    'vastsverige' => 'group_680b8424acb32',
     'interactive-guide' => 'group_5f68a3350351d',
 ));
 $acfExportManager->import();

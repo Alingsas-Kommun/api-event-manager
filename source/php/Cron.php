@@ -5,7 +5,7 @@ namespace HbgEventImporter;
 class Cron
 {
     public static $postTypeSlug = 'event';
-    public static $clients = array('cbis', 'xcap', 'transticket', 'arcgis', 'ols', 'tixticket');
+    public static $clients = array('cbis', 'xcap', 'transticket', 'arcgis', 'ols', 'tixticket', 'vastsverige');
 
     public function __construct()
     {
@@ -330,6 +330,30 @@ class Cron
         return $keys;
     }
 
+    /**
+     * Get Väst Sverige keys
+     * @return array
+     */
+    public function getVastSverigeKeys(): array
+    {
+        $keys = array();
+
+        if (!have_rows('vastsverige_api_urls', 'option')) {
+            return array();
+        }
+        
+        while (have_rows('vastsverige_api_urls', 'option')) {
+            the_row();
+
+            $keys[] = array(
+                'api_url' => get_sub_field('vastsverige_api_url'),
+                'config' => get_sub_field('vastsverige_api_config'),
+            );
+        }
+
+        return $keys;
+    }
+
 
     /**
      * Get TIX ticket keys
@@ -412,6 +436,14 @@ class Cron
                 foreach ((array)$api_keys as $args) {
                     new Parser\OpenLib($args['api_url'], $args);
                 }
+                break;
+            case 'vastsverige':
+                $api_keys = $this->getVastSverigeKeys();
+
+                foreach ((array)$api_keys as $args) {
+                    new Parser\VastSverige($args['api_url'], $args);
+                }
+
                 break;
             case 'tixticket':
                 $tix_data = $this->getTixTicketKeys();

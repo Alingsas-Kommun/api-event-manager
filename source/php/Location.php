@@ -7,6 +7,20 @@ use \HbgEventImporter\Helper\DataCleaner as DataCleaner;
 class Location extends \HbgEventImporter\Entity\PostManager
 {
     public $post_type = 'location';
+    public $ID;
+    public $post_title;
+    public $street_address;
+    public $postal_code;
+    public $city;
+    public $municipality;
+    public $country;
+    public $latitude;
+    public $longitude;
+    public $import_client;
+    public $_event_manager_uid;
+    public $user_groups;
+    public $sync;
+    public $imported_post;
 
     /**
      * Stuff to do before save

@@ -140,13 +140,7 @@ abstract class PostManager
         $meta = array();
         $post['post_status'] = $this->post_status;
 
-        // Get the default class variables and set it's keys to forbiddenKeys
-        $defaultData = get_class_vars(get_class($this));
-        $forbiddenKeys = array_keys($defaultData);
-
-        $data = array_filter(get_object_vars($this), function ($item) use ($forbiddenKeys) {
-            return !in_array($item, $forbiddenKeys);
-        }, ARRAY_FILTER_USE_KEY);
+        $data = get_object_vars($this);
 
         // If data key is allowed post field add to $post else add to $meta
         foreach ($data as $key => $value) {
@@ -324,6 +318,9 @@ abstract class PostManager
         $uploadDir = $uploadDir . '/events';
 
         if (!is_dir($uploadDir)) {
+            if (!is_dir(dirname($uploadDir))) {
+                mkdir(dirname($uploadDir), 0776, true);
+            }
             if (!mkdir($uploadDir, 0776)) {
                 return new WP_Error('event', __(
                     'Could not create folder',

@@ -7,6 +7,40 @@ use \HbgEventImporter\Helper\DataCleaner as DataCleaner;
 class Event extends \HbgEventImporter\Entity\PostManager
 {
     public $post_type = 'event';
+    public $ID;
+    public $sync;
+
+    // Event properties
+    public $price_adult;
+    public $price_children;
+    public $booking_phone;
+    public $post_title;
+    public $post_content;
+    public $_event_manager_uid;
+    public $status;
+    public $event_link;
+    public $booking_link;
+    public $age_restriction;
+    public $price_information;
+    public $categories;
+    public $user_groups;
+    public $organizer;
+    public $occasions;
+    public $occurred;
+    public $ticket_stock;
+    public $ticket_release_date;
+    public $tickets_remaining;
+    public $additional_ticket_retailers;
+    public $price_range_seated_minimum_price;
+    public $price_range_seated_maximum_price;
+    public $price_range_standing_minimum_price;
+    public $price_range_standing_maximum_price;
+    public $additional_ticket_types;
+    public $internal_event;
+    public $import_client;
+    public $imported_post;
+    public $image;
+    public $location;
 
     /**
      * Stuff to do before save
@@ -56,6 +90,11 @@ class Event extends \HbgEventImporter\Entity\PostManager
      */
     public function saveCategories()
     {
+        if (!taxonomy_exists('imported_categories')) {
+            $taxonomy = new \HbgEventImporter\Taxonomy\EventCategories();
+            $taxonomy->registerTaxonomy();
+        }
+
         wp_set_object_terms($this->ID, $this->categories, 'imported_categories', false);
     }
 

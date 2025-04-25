@@ -504,6 +504,10 @@ class Events extends \HbgEventImporter\Entity\CustomPostType
                 $button .= '<button class="button-primary extraspace single-import" data-client="ols">' . __('Import Open Library', 'event-manager') . '</button>';
             }
 
+            if (have_rows('vastsverige_api_urls', 'option')) {
+                $button .= '<button class="button-primary extraspace single-import" data-client="vastsverige">' . __('Import Västsverige', 'event-manager') . '</button>';
+            }
+
             $button .= '</div>';
             $views['import-buttons'] = $button;
         }

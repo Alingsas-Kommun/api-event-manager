@@ -33,6 +33,10 @@ class DataCleaner
      */
     public static function number($number)
     {
+        if (is_null($number)) {
+            return null;
+        }
+        
         return preg_replace('/\D/', '', $number);
     }
 
@@ -55,6 +59,10 @@ class DataCleaner
      */
     public static function string($string)
     {
+        if ($string === null) {
+            return '';
+        }
+
         if (!is_string($string)) {
             return $string;
         }
