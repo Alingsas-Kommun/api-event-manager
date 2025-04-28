@@ -1,6 +1,6 @@
 {
   "name": "kulturkortet-import",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Imports events from Mittkulturkort.se",
   "main": "",
   "scripts": {

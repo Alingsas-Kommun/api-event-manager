@@ -4,7 +4,7 @@
  * Plugin Name:       Event Manager
  * Plugin URI:        http://github.com/helsingborg-stad/api-event-manager/
  * Description:       Manage events locally, and import from XCAP & CBIS.
- * Version:           1.5.1
+ * Version:           1.5.2
  * Author:            Kristoffer Svanmark, Sebastian Thulin, Tommy Morberg, Jonatan Hanson
  * Author URI:        http://www.helsingborg.se
  * License:           MIT

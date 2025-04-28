@@ -149,6 +149,8 @@ class VastSverige extends \HbgEventImporter\Parser
             $this->convertCategoryIdsToNames($eventData->Categories->Event) : array();
         $data['facebook_link'] = !empty($eventData->FacebookLink) ? $eventData->FacebookLink : null;
         $data['instagram_link'] = !empty($eventData->InstagramLink) ? $eventData->InstagramLink : null;
+        $data['contact_phone'] = !empty($eventData->Contact->Phone) ? $eventData->Contact->Phone : null;
+        $data['contact_email'] = !empty($eventData->Contact->Email) ? $eventData->Contact->Email : null;
         $data['location'] = null;
         
         $data['occasions'] = array();
@@ -238,6 +240,8 @@ class VastSverige extends \HbgEventImporter\Parser
                     'instagram' => $data['instagram_link'],
                     'categories' => $data['categories'],
                     'occasions' => $data['occasions'],
+                    'contact_phone' => $data['contact_phone'],
+                    'contact_email' => $data['contact_email'],
                     'location' => $data['location'] ?? null,
                     'organizer' => null,
                     'booking_link' => null,
