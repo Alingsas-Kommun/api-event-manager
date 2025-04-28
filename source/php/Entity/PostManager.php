@@ -190,6 +190,7 @@ abstract class PostManager
                 wp_update_post($post);
             } else {
                 $this->ID = $duplicate->ID;
+                $this->afterSave();
                 return false;
             }
         } else {
