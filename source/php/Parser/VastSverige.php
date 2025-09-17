@@ -4,6 +4,7 @@ namespace HbgEventImporter\Parser;
 
 use \HbgEventImporter\Event as Event;
 use \HbgEventImporter\Location as Location;
+use \HbgEventImporter\Organizer as Organizer;
 
 ini_set('memory_limit', '256M');
 ini_set('default_socket_timeout', 60 * 10);
@@ -174,7 +175,7 @@ class VastSverige extends \HbgEventImporter\Parser
                     $eventData->Contact->longitude = $eventData->Position->lng;
                 }
 
-                $locationId = !empty($eventData->Contact) ? $this->maybeCreateLocation($eventData->Contact, $data['userGroups'], $data['postStatus']) : null;
+                $locationId = !empty($eventData->Contact) ? $this->maybeCreateLocation($eventData->City, $data['userGroups'], $data['postStatus']) : null;
 
                 $data['location'] = $locationId;
 
@@ -189,16 +190,20 @@ class VastSverige extends \HbgEventImporter\Parser
             }
         }
         
-        $this->maybeCreateEvent($data);
+        // Create organizer from contact data
+        $organizerId = !empty($eventData->Contact) ? $this->maybeCreateOrganizer($eventData->Contact, $data['userGroups'], $data['postStatus']) : null;
+        
+        $this->maybeCreateEvent($data, $organizerId);
     }
 
     /**
      * Creates or updates an event if possible
      * @param  array  $data       Event data
+     * @param  int    $organizerId Organizer ID
      * @return boolean|int          Event id or false
      * @throws \Exception
      */
-    public function maybeCreateEvent($data)
+    public function maybeCreateEvent($data, $organizerId = null)
     {
         $eventId = $this->checkIfPostExists('event', $data['postTitle']);
         $occurred = false;
@@ -243,7 +248,10 @@ class VastSverige extends \HbgEventImporter\Parser
                     'contact_phone' => $data['contact_phone'],
                     'contact_email' => $data['contact_email'],
                     'location' => $data['location'] ?? null,
-                    'organizer' => null,
+                    'organizer' => !empty($organizerId) ? array(array(
+                        'main_organizer' => true,
+                        'organizer' => intval($organizerId)
+                    )) : null,
                     'booking_link' => null,
                     'booking_phone' => null,
                     'age_restriction' => null,
@@ -295,24 +303,24 @@ class VastSverige extends \HbgEventImporter\Parser
     /**
      * Creates or updates a location if possible
      *
-     * @param [object] $data Data object
+     * @param [string] $cityName City name
      * @param [array] $userGroups User groups
      * @param [string] $locationPostStatus Post status
      * @return boolean|int  Location id or false
      * @throws \Exception
      */
-    public function maybeCreateLocation($data, $userGroups, $locationPostStatus)
+    public function maybeCreateLocation($cityName, $userGroups, $locationPostStatus)
     {
-        // Bail if essential data is missing
-        if (empty($data->CompanyName) && empty($data->Street)) {
+        // Bail if city name is empty
+        if (empty($cityName)) {
             return false;
         }
 
-        $postTitle = !empty($data->CompanyName) ? $data->CompanyName : $data->Street;
+        $postTitle = $cityName;
         // Checking if there is a location already with this title or similar enough
         $locationId = $this->checkIfPostExists('location', $postTitle);
         $isUpdate = false;
-        $uid = $this->getEventUid($data->CompanyName);
+        $uid = $this->getEventUid($cityName);
 
         // Check if this is a duplicate or update and if "sync" option is set.
         if ($locationId && get_post_meta($locationId, '_event_manager_uid', true)) {
@@ -337,13 +345,6 @@ class VastSverige extends \HbgEventImporter\Parser
                     'post_status' => $locationPostStatus,
                 ),
                 array(
-                    'street_address' => $data->Street ?? null,
-                    'postal_code' => null,
-                    'city' => $data->City ?? null,
-                    'municipality' => null,
-                    'country' => null,
-                    'latitude' => $data->latitude ?? null,
-                    'longitude' =>  $data->longitude ?? null,
                     'import_client' => 'vast-sverige',
                     '_event_manager_uid' => $uid,
                     'user_groups' => $userGroups,
@@ -369,8 +370,85 @@ class VastSverige extends \HbgEventImporter\Parser
         return $location->ID;
     }
 
+    /**
+     * Creates or updates an organizer if possible
+     *
+     * @param [object] $data Data object
+     * @param [array] $userGroups User groups
+     * @param [string] $organizerPostStatus Post status
+     * @return boolean|int  Organizer id or false
+     * @throws \Exception
+     */
+    public function maybeCreateOrganizer($data, $userGroups, $organizerPostStatus)
+    {
+        // Bail if essential data is missing
+        if (empty($data->CompanyName) && empty($data->Email)) {
+            return false;
+        }
+
+        $postTitle = !empty($data->CompanyName) ? $data->CompanyName : $data->Email;
+        // Checking if there is an organizer already with this title or similar enough
+        $organizerId = $this->checkIfPostExists('organizer', $postTitle);
+        $isUpdate = false;
+        $uid = $this->getEventUid($data->CompanyName ?: $data->Email);
+
+        // Check if this is a duplicate or update and if "sync" option is set.
+        if ($organizerId && get_post_meta($organizerId, '_event_manager_uid', true)) {
+            $existingUid = get_post_meta($organizerId, '_event_manager_uid', true);
+            $sync = get_post_meta($organizerId, 'sync', true);
+            $organizerPostStatus = get_post_status($organizerId);
+
+            if ($existingUid == $uid && $sync == 1) {
+                $isUpdate = true;
+            }
+        }
+
+        if ($organizerId && !$isUpdate) {
+            return $organizerId;
+        }
+
+        // Create the organizer
+        try {
+            $organizer = new Organizer(
+                array(
+                    'post_title' => $postTitle,
+                    'post_status' => $organizerPostStatus,
+                ),
+                array(
+                    'email' => $data->Email ?? null,
+                    'phone' => $data->Phone ?? null,
+                    'website' => $data->Website ?? null,
+                    'import_client' => 'vast-sverige',
+                    '_event_manager_uid' => $uid,
+                    'user_groups' => $userGroups,
+                    'sync' => 1,
+                    'imported_post' => 1,
+                )
+            );
+        } catch (\Exception $e) {
+            error_log($e);
+            if ($organizerId) {
+                return $organizerId;
+            } else {
+                return false;
+            }
+        }
+
+        if (!$organizer->save()) {
+            if ($organizerId) {
+                return $organizerId;
+            } else {
+                return false;
+            }
+        }
+
+        $this->levenshteinTitles['organizer'][] = array('ID' => $organizer->ID, 'post_title' => $postTitle);
+
+        return $organizer->ID;
+    }
+
      /**
-     * Returns event manager UID
+      * Returns event manager UID
      *
      * @param [mixed] $identifier
      * @return void
