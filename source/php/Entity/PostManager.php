@@ -333,23 +333,30 @@ abstract class PostManager
             }
         }
 
-        // Generate filename based on URL hash to ensure uniqueness
-        $urlHash = md5($url);
-        $originalFilename = preg_replace('/\?.*/', '', $url);
-        $originalFilename = sanitize_file_name(basename($originalFilename));
-        
-        // Get file extension
-        $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
-        if (empty($extension) || stripos($originalFilename, '.aspx')) {
-            $extension = 'jpg';
+        // Remove query string from filename
+        $filename = preg_replace('/\?.*/', '', $url);
+        // Sanitize the file name
+        $filename = sanitize_file_name(basename($filename));
+        if (stripos(basename($url), '.aspx')) {
+            $filename = md5($filename) . '.jpg';
         }
-        
-        $filename = $urlHash . '.' . $extension;
 
-        // Check if image already exists in library by URL hash
-        if ($attachmentId = $this->attachmentExists($uploadDir . '/' . $filename)) {
+        // Check if image already exists by source URL
+        if ($attachmentId = $this->attachmentExistsByUrl($url)) {
             set_post_thumbnail((int)$this->ID, (int)$attachmentId);
             return $attachmentId;
+        }
+
+        // Check if file with same basename exists and has same content
+        if ($attachmentId = $this->attachmentExists($uploadDir . '/' . basename($filename))) {
+            // Check If image from url and local are same md 5 Check
+            $imageLocal = md5_file($uploadDir . '/' . basename($filename));
+            $imageUrl = md5_file($url);
+
+            if ($imageLocal == $imageUrl) {
+                set_post_thumbnail((int)$this->ID, (int)$attachmentId);
+                return $attachmentId;
+            }
         }
         // Save file to server
         $contents = file_get_contents(str_replace(' ', '%20', $url));
@@ -364,11 +371,14 @@ abstract class PostManager
         $attachmentId = wp_insert_attachment(array(
             'guid' => $uploadDir . '/' . basename($filename),
             'post_mime_type' => $filetype['type'],
-            'post_title' => $originalFilename, // Use original filename for title
+            'post_title' => $filename,
             'post_content' => '',
             'post_status' => 'inherit',
             'post_parent' => $this->ID
         ), $uploadDir . '/' . $filename, $this->ID);
+
+        // Store the source URL for future reference
+        update_post_meta($attachmentId, '_source_url', $url);
 
         // Generate attachment meta
         require_once(ABSPATH . 'wp-admin/includes/image.php');
@@ -389,6 +399,27 @@ abstract class PostManager
     {
         global $wpdb;
         $query = "SELECT ID FROM {$wpdb->posts} WHERE guid = '$src'";
+        $id = $wpdb->get_var($query);
+
+        if (!empty($id) && $id > 0) {
+            return $id;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if an attachment already exists by source URL
+     * @param  string $url Source URL
+     * @return mixed
+     */
+    private function attachmentExistsByUrl($url)
+    {
+        global $wpdb;
+        $query = $wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_source_url' AND meta_value = %s",
+            $url
+        );
         $id = $wpdb->get_var($query);
 
         if (!empty($id) && $id > 0) {
