@@ -294,7 +294,11 @@ class VastSverige extends \HbgEventImporter\Parser
         }
 
         if (!is_null($event->image)) {
-            $event->setFeaturedImageFromUrl($event->image);
+            $imageId = $event->setFeaturedImageFromUrl($event->image);
+
+            if ($imageId) {
+                update_post_meta($imageId, '_wp_attachment_image_alt', $data['postTitle']);
+            }
         }
 
         return $event->ID;

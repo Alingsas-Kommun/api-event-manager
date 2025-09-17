@@ -378,6 +378,8 @@ abstract class PostManager
         wp_update_attachment_metadata($attachmentId, $attachData);
 
         set_post_thumbnail($this->ID, $attachmentId);
+
+        return $attachmentId;
     }
 
     /**
