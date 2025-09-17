@@ -333,25 +333,23 @@ abstract class PostManager
             }
         }
 
-        // Remove query string from filename
-        $filename = preg_replace('/\?.*/', '', $url);
-        // Sanitize the file name
-        $filename = sanitize_file_name(basename($filename));
-        if (stripos(basename($url), '.aspx')) {
-            $filename = md5($filename) . '.jpg';
+        // Generate filename based on URL hash to ensure uniqueness
+        $urlHash = md5($url);
+        $originalFilename = preg_replace('/\?.*/', '', $url);
+        $originalFilename = sanitize_file_name(basename($originalFilename));
+        
+        // Get file extension
+        $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+        if (empty($extension) || stripos($originalFilename, '.aspx')) {
+            $extension = 'jpg';
         }
+        
+        $filename = $urlHash . '.' . $extension;
 
-        // Bail if image already exists in library
-        if ($attachmentId = $this->attachmentExists($uploadDir . '/' . basename($filename))) {
-
-            // Check If image from url and local are same md 5 Check
-            $imageLocal = md5_file($uploadDir . '/' . basename($filename));
-            $imageUrl = md5_file($url);
-
-            if ($imageLocal == $imageUrl) {
-                set_post_thumbnail((int)$this->ID, (int)$attachmentId);
-                return;
-            }
+        // Check if image already exists in library by URL hash
+        if ($attachmentId = $this->attachmentExists($uploadDir . '/' . $filename)) {
+            set_post_thumbnail((int)$this->ID, (int)$attachmentId);
+            return $attachmentId;
         }
         // Save file to server
         $contents = file_get_contents(str_replace(' ', '%20', $url));
@@ -366,7 +364,7 @@ abstract class PostManager
         $attachmentId = wp_insert_attachment(array(
             'guid' => $uploadDir . '/' . basename($filename),
             'post_mime_type' => $filetype['type'],
-            'post_title' => $filename,
+            'post_title' => $originalFilename, // Use original filename for title
             'post_content' => '',
             'post_status' => 'inherit',
             'post_parent' => $this->ID
