@@ -254,7 +254,7 @@ abstract class PostManager
             $bookingLink = isset($occasion['booking_link']) && !empty($occasion['booking_link'])
                 ? $occasion['booking_link']
                 : null;
-            $exist = $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE event = {$postId} AND timestamp_start = {$timestampStart} AND timestamp_end = {$timestampEnd} AND booking_link = '{$bookingLink}'");
+            $exist = $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE event = {$postId} AND timestamp_start = {$timestampStart} AND timestamp_end = {$timestampEnd} AND COALESCE(booking_link, '') = '" . esc_sql((string) $bookingLink) . "'");
 
             if ($exist == 0) {
                 return true;
